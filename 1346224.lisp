@@ -64,12 +64,12 @@
 (defun subsetsum (L S)
     (cond
         ((= S 0) L)
+        ((< S 0) nil)
         ((< (xsum L) S) nil)
         ((= (xsum L) S) L)
-
         ((null L) nil)
         (t (cond
-                ((subsetsum (cdr L) (- S (car L))) (append () (subsetsum (cdr L) (- S (car L)))))
+                ((subsetsum (cdr L) (- S (car L))) (append (list (car L)) (subsetsum (cdr L) (- S (car L)))))
                 (t (append () (subsetsum (cdr L) S)))
             )
         )

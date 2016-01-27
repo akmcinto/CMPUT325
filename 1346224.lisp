@@ -4,8 +4,7 @@
 #|
  This function takes an element x and a list y, and returns whether x is a
  member of y.  x can be an atom or another list.  The function returns T if x is
- a member of y, and nil if it is not.  This is done by testing each element of y
- to test if it is equal to x.
+ a member of y, and nil if it is not.
 |#
 (defun xmember (x y)
     (cond
@@ -18,12 +17,15 @@
 ;QUESTION 2
 #|
  This function takes a list x with sublists nested to any depth, and returns a list
- of just the atoms contained in x.  x should not contain any empty lists, (), or
- nil elements.  The ordering of the atoms in x are maintained in the output.
+ of just the atoms contained in x.  If nil or an empty list, (), is an element of x
+ or any of its nested sublists then nil will also be present in the flattened list
+ (it is treayed like an atom, not a list with no elements).  The ordering of the atoms
+ in x are maintained in the output.
 
  Test Cases:
  (flatten '(1 (2) 3)) => (1 2 3)
  (flatten '(1 (2 (3) 4) 5)) => (1 2 3 4 5)
+ (flatten '((1 2) (3 4 nil) nil (5 (6 7)))) => (1 2 3 4 nil nil 5 6 7)
 |#
 (defun flatten (x)
     (cond
@@ -87,7 +89,7 @@
 
 ;QUESTION 5
 #| Part 1
- No, this is not always true.  The result will be different from (l1 L2) in the case
+ No, this is not always true.  The result will be different from (L1 L2) in the case
  that L1 is 2 or more elements longer than L2, or L2 is 1 or more elements longer than
  L1.  This is because split will evenly break apart the elements of the list created by
  mix, so if L1 or L2 are unbalanced in length they will not be returned by the split function.
@@ -111,9 +113,16 @@
  and L should be a list containing only numeric atoms (no sublists).  If no combination
  of the values in L sum to S, then nil is returned.  If multiple subsets of L sum
  to S only one is returned.  This is done using a helper function, create_subset.
+ create_subset returns a subset with the elements reversed to the order they are
+ in L, so the returned value must be reversed to obtain the original ordering.
+
+ Test Cases:
+ (subsetsum '(1 2 3 4) 5) => (1 4) ; Note that only (1 4) is returned, but (2 3) is also correct
+ (subsetsum '(1 2 3) 6) => (1 2 3)
+ (subsetsum '(1 3 5) 7) => nil
 |#
 (defun subsetsum (L S)
-    (create_subset L S ())
+    (xreverse (create_subset L S ()))
 )
 
 #|
@@ -127,7 +136,13 @@
  or if S becomes negative (the values in the subset sum to more than S) then that
  subset does not work and nil is returned.  Otherwise, for each iteration two subsets
  are created to be tested, one which contains the first element of L and one which
- doesn't: in this way all possible subsets are tested.
+ doesn't: in this way all possible subsets are tested.  The subset is created with
+ its elements reversed relative to their original ordering in L.
+
+ Test Cases:
+ (create_subset '(1 2 3 4) 5 ()) => (4 1)
+ (create_subset '(1 2 3) 6 ()) => (3 2 1)
+ (create_subset '(1 3 5) 7 ()) => nil
 |#
 (defun create_subset (L S subset)
     (cond
@@ -135,10 +150,28 @@
         ((< S 0) nil)
         ((null L) nil)
         ((> (car L) S) (create_subset (cdr L) S subset))
-        (t (or (create_subset (cdr L) (- S (car L)) (append subset (list (car L))))
+        (t (or (create_subset (cdr L) (- S (car L)) (cons (car L) subset))
                 (create_subset (cdr L) S subset)
             )
         )
+    )
+)
+
+#|
+ A function to reverse the ordering of items in a list x.  The ordering of elements
+ in any nested sublist of x will not be reversed (the sublist will be treated as a
+ single element during the reversing).  This is used as a helper function for the
+ subsetsum function, as it reverses the subset returned by create_subset so that
+ the elements in the subset have the same ordering as in L.
+
+ Test Cases:
+ (xreverse '(1 2 3)) => (3 2 1)
+ (xreverse '(1 (2 3) 4)) => (4 (2 3) 1)
+|#
+(defun xreverse (x)
+    (cond
+        ((null x) nil)
+        (t (append (xreverse (cdr x)) (list (car x))))
     )
 )
 

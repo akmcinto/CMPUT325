@@ -102,8 +102,9 @@
  As an extension of Part 1, mixing these lists together will only result in a result
  different from L if the first part of the split, (car (split L)), is two or more elements
  longer than than the second part of the split, (cadr (split L)), or the second part of the
- split is one or more elements longer than the first part.  Since neither of these conditions
- can occur as a result of the split opperation, so the mix will return L in all cases.
+ split is one or more elements longer than the first part.  Since neither of these cases
+ can occur as a result of the split opperation (at most the first part of the split can
+ have one more element than the second part), so the mix will return L in all cases.
 |#
 
 ;QUESTION 6

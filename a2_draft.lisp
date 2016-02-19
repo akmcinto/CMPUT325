@@ -1,22 +1,24 @@
-(defun fl-interp-atom-context (E C)
+(defun find_var_in_context (E C)
     (cond
         ((null C) E)
-        (
-            (equal E (caar C))
-            (cdar C)
-        )
-        (
-            T
-            (fl-interp-atom-context E (cdr C))
-        )
+        ((equal E (caar C)) (cdar C))
+        (t (find_var_in_context E (cdr C)))
     )
 )
 
-(defun fl-interp-atom (E P C)
+(defun find_func_in_program (E P C)
     (cond
-        ((null P) (fl-interp-atom-context E C))
+        ((null P) (find_var_in_context E C))
         ((equal (caar P) E) (list (get_fnargs (cdar P)) (get_fnbody (car P))))
-        (t (fl-interp-atom E (cdr P) C))
+        (t (find_func_in_program E (cdr P) C))
+    )
+)
+
+(defun get_func (f arity P)
+    (cond
+        ((null P) nil)
+        ((and (equal (caar P) f) (equal arity (get_arity (get_fnargs (cdar P))))) (list (get_fnargs (cdar P)) (get_fnbody (car P))))
+        (t (get_func f arity (cdr P)))
     )
 )
 
@@ -40,8 +42,7 @@
 
 (defun _fl-interp (E P C)
     (cond
-        ((atom E) (fl-interp-atom E P C))  ; this includes the case where expr is nil
-        ;((numberp (car E)) E)
+        ((atom E) (find_func_in_program E P C))  ; this includes the case where expr is nil
         (t
             (let ((f (car E)) (arg (cdr E)))
                 (cond
@@ -64,22 +65,31 @@
                     ((eq f 'and)  (not (null (and (_fl-interp (car arg) P C) (_fl-interp (cadr arg) P C)))))
                     ((eq f 'or)  (not (null (or (_fl-interp (car arg) P C) (_fl-interp (cadr arg) P C)))))
                     ((eq f 'not)  (not (_fl-interp (car arg) P C)))
-                    ((equal (fl-interp-atom f P C) f) E)
 
                     (t
                         (let
                             ((ev_args (eval_args arg P C))
-                                (closure (_fl-interp f P C)))
-                            (let
-                                ((new_context (get_context (car closure) ev_args C))
-                                    (body (cadr closure)))
-                                (_fl-interp body P new_context)
+                                (closure (get_func f (get_arity arg) P)))
+                            (if closure
+                                (let
+                                    ((new_context (get_context (car closure) ev_args C))
+                                        (body (cadr closure)))
+                                    (_fl-interp body P new_context) ; Change to a function-specific thing?
+                                )
+                                E
                             )
                         )
                     )
                 )
             )
         )
+    )
+)
+
+(defun get_arity (args)
+    (cond
+        ((null args) 0)
+        (t (+ 1 (get_arity (cdr args))))
     )
 )
 

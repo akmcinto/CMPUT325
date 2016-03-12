@@ -10,9 +10,9 @@ xreverse([F|L1], L2) :- xreverse(L1, N), append(N, [F], L2).
 /* --------------------
 #2
 ---------------------*/
-xunique([],_).
-xunique([F|L], Lu) :- notMember(F, L), xunique(L, [F|Lu]).
-xunique([F|L], Lu) :- member(F, L), xunique(L, Lu).
+xunique([], _).
+xunique([F|L], Lu) :- member(F, Lu), xunique(L, Lu).
+xunique([F|L], Lu) :- notMember(F, Lu), append(Lu, [F], X), xunique(L, X).
 
 notMember(_, []).
 notMember(A, [F|R]) :- A \== F, notMember(A, R).

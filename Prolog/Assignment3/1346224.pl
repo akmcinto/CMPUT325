@@ -1,3 +1,9 @@
+ % Andrea McIntosh
+ % 1346224
+ % CMPUT 325, Section B1
+ % Assignment 3
+ % Consulted with Jenna Hatchard and Dylan Ashley
+
 /* --------------------
 #1
 xreverse(L, R).  Predicate to find the reverse of a list, where L is a list and
@@ -26,6 +32,10 @@ Test Cases:
     xunique([1,2,4,3,3,2], [1,2,4,3]).  -> true
     xunique([1,2,4,3,3,2], [1,2,3,4]).  -> false (because ordering is wrong)
     xunique([1,2,3,2], [1,2,3,2]).      -> false
+
+notMember(A, L) is a helper predicate for xunique (and also the helper predicate notsubset
+in question 5.2).  It takes an atom A and a list of atoms L, and returns true if
+A is not an element of L and false if it is.
 ---------------------*/
 xunique(L, Lu) :- xunique(L, [], Lu).
 xunique([], _, []).
@@ -104,8 +114,13 @@ allConnected(L).  This predicate tests if every node in a list is connected to e
 other node.  L is a list of nodes.  The nodes are all connected if there is an edge
 between every pair of nodes.
 
+connect(A, L) is a helper predicate for allConnected.  A is a node and L is a list of
+nodes.  The predicate determines if A is connected to all nodes in L.
+
 Test Cases:
-    allConnected(L) ->
+    allConnected([a]).     -> true
+    allConnected([a,b,c]). -> true
+    allConnected([b,e]).   -> false
 ---------------------*/
 allConnected([]).
 allConnected([H|T]) :- connect(H, T), allConnected(T).
@@ -116,6 +131,36 @@ connect(A, [X|L]) :- edge(X, A), connect(A, L).
 
 /* --------------------
 #5.2
+maxclique(N, Cliques).  This predicate finds all maximal cliques of a certain size in
+a non-directed graph.  N is a number, and Cliques is a list of cliques or a variable.
+If Cliques is a varible then the predicate returns all maximal cliques of size N.
+If Cliques is a list of cliques then the predicate returns whether or not Cliques
+contains all possible maximal cliques of size N.  The maximal cliques are found by
+finding all cliques of size N or larger, finding which of these cliques are maximal
+cliques in the graph, and then returning only those maximal cliques of length extactly N.
+
+Test Cases:
+    maxclique(3, X).             -> X = [[a,b,c]]
+    maxclique(2, [[a,d],[a,e]]). -> true
+    maxclique(2, [[a,d]]).       -> false
+
+cliqueLargerThan(N, L) is a helper predicate for maxclique used to filter out cliques
+that are smaller than length N.  Given a number N and a variable L cliqueLargerThan
+will return all cliques of length N or longer.  It is important for the functionality
+of maxclique that cliques larger than N are returned as well, as they are used to
+determine whether a clique is truly maximal or not in the graph.
+
+inList(X, L) is a helper predicate for maxclique.  It takes a list X and a list of
+lists X, and returns whether X is one of the lists in L or not.
+
+isMaxClique(X, L) is a helper predicate for maxclique that is used to determine
+whether a clique is maximal in the graph or not.  It takes a clique X and a list of
+cliques L, and returns whether X is maximal based on the cliques in L or not.
+
+notsubset(L1, L2) is a helper predicate for maxclique.  It takes two cliques L1
+and L2, and returns true if L1 is not a subset of L2, and will return false if L1
+is a subset of L2.  If L1 and L2 are the same then notsubset will return false as
+a clique is a subset of itself.
 ---------------------*/
 maxclique(N, L) :- number(N), findall(C, cliqueLargerThan(N, C), G),
                                 findall(M, (inList(M, G), isMaxClique(M, G)), X),
@@ -132,15 +177,3 @@ isMaxClique(L, [H|T]) :- L == H, isMaxClique(L, T).
 
 notsubset([H|_], X) :- notMember(H, X).
 notsubset([H|T], X) :- member(H, X), notsubset(T, X).
-
-node(a).
-node(b).
-node(c).
-node(d).
-node(e).
-
-edge(a,b).
-edge(b,c).
-edge(c,a).
-edge(d,a).
-edge(a,e).

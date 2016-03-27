@@ -114,18 +114,19 @@ allConnected(L).  This predicate tests if every node in a list is connected to e
 other node.  L is a list of nodes.  The nodes are all connected if there is an edge
 between every pair of nodes.
 
-connect(A, L) is a helper predicate for allConnected.  A is a node and L is a list of
-nodes.  The predicate determines if A is connected to all nodes in L.
-
 Test Cases:
     allConnected([a]).     -> true
     allConnected([a,b,c]). -> true
     allConnected([b,e]).   -> false
+
+connect(A, L) is a helper predicate for allConnected.  A is a node and L is a list of
+nodes.  The predicate determines if A is connected to all nodes in L.
 ---------------------*/
 allConnected([]).
 allConnected([H|T]) :- connect(H, T), allConnected(T).
 
 connect(_, []).
+% Graph is non-directed, so check for both possible orderings of nodes (an edge should only be specified once)
 connect(A, [X|L]) :- edge(A, X), connect(A, L).
 connect(A, [X|L]) :- edge(X, A), connect(A, L).
 
@@ -172,6 +173,7 @@ inList(X, [X|_]).
 inList(X, [H|T]) :- X \== H, inList(X, T).
 
 isMaxClique(_, []).
+% If L == H, L may still be a max clique but notsubset will return false, so just continue along T
 isMaxClique(L, [H|T]) :- L \== H, notsubset(L, H), isMaxClique(L, T).
 isMaxClique(L, [H|T]) :- L == H, isMaxClique(L, T).
 

@@ -13,13 +13,6 @@ fourSquares(N, [S1, S2, S3, S4]) :-
 /*
 QUESTION 2
 */
-% disarm([], [], _).
-% disarm(D1, D2, S) :- member(A, D1), sumTwo(A, D2, [X,Y]),
-%     removeElement(X, D2, N), removeElement(Y, N, F), removeElement(A, D1, L),
-%     disarm(L, F, [[[A], [X, Y]]|S]).
-% disarm(D1, D2, S) :- member(A, D2), sumTwo(A, D1, [X,Y]),
-%     removeElement(X, D1, N), removeElement(Y, N, F), removeElement(A, D2, L),
-%     disarm(F, L, [[[X, Y], [A]]|S]).
 disarm(D1, D2, S) :- disarm(D1, D2, [], S).
 disarm([], [], S, S) :- checkStrengths(S).
 disarm(D1, D2, G, S) :- member(A, D1), sumTwo(A, D2, [X,Y]),
@@ -29,6 +22,7 @@ disarm(D1, D2, G, S) :- member(A, D2), sumTwo(A, D1, [X,Y]),
     removeElement(X, D1, N), removeElement(Y, N, F), removeElement(A, D2, L),
     disarm(F, L, [[[X, Y], [A]]|G], S).
 
+checkStrengths([]).
 checkStrengths([_|[]]).
 checkStrengths([H,T|S]) :- compareStrengths(H, T), checkStrengths([T|S]).
 

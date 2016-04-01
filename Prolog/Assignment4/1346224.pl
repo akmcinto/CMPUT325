@@ -13,17 +13,26 @@ fourSquares(N, [S1, S2, S3, S4]) :-
 /*
 QUESTION 2
 */
-disarm([], [], _).
-% disarm([A|D1], D2, S) :- sumTwo(A, D2, [X,Y]),
-%     removeElement(X, D2, N), removeElement(Y, N, F), disarm(D1, F, [[A, [X, Y]]|S]).
-% disarm(D1, [A|D2], S) :- sumTwo(A, D1, [X,Y]),
-%     removeElement(X, D1, N), removeElement(Y, N, F), disarm(F, D2, [[A, [X, Y]]|S]).
-disarm(D1, D2, S) :- member(A, D1), sumTwo(A, D2, [X,Y]),
+% disarm([], [], _).
+% disarm(D1, D2, S) :- member(A, D1), sumTwo(A, D2, [X,Y]),
+%     removeElement(X, D2, N), removeElement(Y, N, F), removeElement(A, D1, L),
+%     disarm(L, F, [[[A], [X, Y]]|S]).
+% disarm(D1, D2, S) :- member(A, D2), sumTwo(A, D1, [X,Y]),
+%     removeElement(X, D1, N), removeElement(Y, N, F), removeElement(A, D2, L),
+%     disarm(F, L, [[[X, Y], [A]]|S]).
+disarm(D1, D2, S) :- disarm(D1, D2, [], S).
+disarm([], [], S, S) :- checkStrengths(S).
+disarm(D1, D2, G, S) :- member(A, D1), sumTwo(A, D2, [X,Y]),
     removeElement(X, D2, N), removeElement(Y, N, F), removeElement(A, D1, L),
-    disarm(L, F, [[[A], [X, Y]]|S]).
-disarm(D1, D2, S) :- member(A, D2), sumTwo(A, D1, [X,Y]),
+    disarm(L, F, [[[A], [X, Y]]|G], S).
+disarm(D1, D2, G, S) :- member(A, D2), sumTwo(A, D1, [X,Y]),
     removeElement(X, D1, N), removeElement(Y, N, F), removeElement(A, D2, L),
-    disarm(F, L, [[[X, Y], [A]]|S]).
+    disarm(F, L, [[[X, Y], [A]]|G], S).
+
+checkStrengths([_|[]]).
+checkStrengths([H,T|S]) :- compareStrengths(H, T), checkStrengths([T|S]).
+
+compareStrengths([H|_], [F|_]) :- sumlist(H, D), sumlist(F, E), D =< E.
 
 sumTwo(N, L, [A, B]) :- member(A, L), removeElement(A, L, X),
     member(B, X), A #=< B, A + B #= N.

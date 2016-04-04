@@ -12,29 +12,25 @@ fourSquares(N, [S1, S2, S3, S4]) :-
 
 /*
 QUESTION 2
+http://stackoverflow.com/questions/15442499/example-how-to-use-predsortcompare-list-sorted-in-prolog
 */
-% disarm([], [], []).
-% disarm(D1, D2, [[[A], [X, Y]]|S]) :- member(A, D1), sumTwo(A, D2, [X,Y]),
-%     removeElement(X, D2, N), removeElement(Y, N, F), removeElement(A, D1, L),
-%     disarm(L, F, S).
-% disarm(D1, D2, [[[X, Y], [A]]|S]) :- member(A, D2), sumTwo(A, D1, [X,Y]),
-%     removeElement(X, D1, N), removeElement(Y, N, F), removeElement(A, D2, L),
-%     disarm(F, L, S).
-disarm(D1, D2, S) :- disarm(D1, D2, [], S), !.
-disarm([], [], S, S) :- checkStrengths(S).
-disarm(D1, D2, G, S) :- member(A, D1), sumTwo(A, D2, [X,Y]),
-    removeElement(X, D2, N), removeElement(Y, N, F), removeElement(A, D1, L),
-    disarm(L, F, [[[A], [X, Y]]|G], S).
-disarm(D1, D2, G, S) :- member(A, D2), sumTwo(A, D1, [X,Y]),
-    removeElement(X, D1, N), removeElement(Y, N, F), removeElement(A, D2, L),
-    disarm(F, L, [[[X, Y], [A]]|G], S).
+disarm(D1, D2, S) :- find_disarm(D1, D2, D1, D2, X), !, predsort(compareStrengths, X, S).
 
-checkStrengths([]).
-checkStrengths([_|[]]).
-checkStrengths([H,T|S]) :- compareStrengths(H, T), checkStrengths([T|S]).
+find_disarm(_, _, [], [], []).
+find_disarm(O1, O2, [A|D1], D2, [[[A], [X, Y]]|S]) :- sumTwo(A, D2, [X,Y]),
+    removeElement(X, D2, N), removeElement(Y, N, F),
+    removeElement(A, O1, U), removeElement(X, O2, W), removeElement(Y, W, V),
+    find_disarm(U, V, D1, F, S).
+find_disarm(O1, O2, D1, [A|D2], [[[X, Y], [A]]|S]) :- sumTwo(A, D1, [X,Y]),
+    removeElement(X, D1, N), removeElement(Y, N, F),
+    removeElement(A, O2, U), removeElement(X, O1, W), removeElement(Y, W, V),
+    find_disarm(V, U, F, D2, S).
+find_disarm(O1, O2, [A|D1], [B|D2], S) :- append(D1, [A], X), append(D2, [B], H), O1 \== X, O2 \== H, find_disarm(O1, O2, X, H, S).
+% disarm([A|D1], [B|D2], S) :- append(D1, [A], G), disarm(G, [B|D2], S); append(D2, [B], H), disarm([A|D1], H, S).
 
-compareStrengths([H|_], [F|_]) :- sumlist(H, D), sumlist(F, E), D =< E.
-
+compareStrengths(<, [H|_], [F|_]) :- sumlist(H, D), sumlist(F, E), D < E.
+compareStrengths(>, [H|_], [F|_]) :- sumlist(H, D), sumlist(F, E), D > E.
+compareStrengths(=, [H|_], [F|_]) :- sumlist(H, D), sumlist(F, E), D = E.
 % sumTwo(N, L, [A, B]) :- member(A, L), removeElement(A, L, X),
 %     member(B, X), N is A + B.
 sumTwo(N, [A|L], [A,B]) :- member(B, L), N is A + B.
